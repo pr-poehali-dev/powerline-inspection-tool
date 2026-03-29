@@ -1,0 +1,33 @@
+{
+  "tests": [
+    {
+      "name": "GET inspections list",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {"inspections": []},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "POST create inspection",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "poleId": "1",
+        "poleName": "Оп.1",
+        "lineName": "ВЛ-110 кВ Тест",
+        "templateId": null,
+        "datetime": "29.03.2026, 10:00:00",
+        "lat": 55.7522,
+        "lng": 37.6156,
+        "tiltAngle": "1.5",
+        "photo": null,
+        "defects": [],
+        "notes": "Тестовый осмотр"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {"id": "string"},
+      "bodyMatcher": "partial"
+    }
+  ]
+}

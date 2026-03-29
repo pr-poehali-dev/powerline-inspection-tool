@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Icon from '@/components/ui/icon';
+import { api } from '@/lib/api';
 import HomePage from './HomePage';
 import TemplatePage from './TemplatePage';
 import MapPage from './MapPage';
@@ -54,29 +55,48 @@ export default function Index() {
   const [selectedPole, setSelectedPole] = useState<Pole | null>(null);
   const [inspections, setInspections] = useState<InspectionRecord[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([api.getTemplate(), api.getInspections()])
+      .then(([tmpl, insps]) => {
+        if (tmpl) setTemplate(tmpl);
+        if (insps.length > 0) setInspections(insps);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   const navigate = (page: string) => {
     setActivePage(page as PageId);
     setSidebarOpen(false);
   };
 
-  const handleSaveInspection = (record: InspectionRecord) => {
-    setInspections(prev => {
-      const existing = prev.findIndex(r => r.poleId === record.poleId);
-      if (existing >= 0) {
-        const updated = [...prev];
-        updated[existing] = { ...updated[existing], ...record };
-        return updated;
-      }
-      return [...prev, record];
-    });
+  const handleTemplateLoaded = async (tmpl: LineTemplate) => {
+    setTemplate(tmpl);
+    await api.saveTemplate(tmpl);
   };
 
-  const handleUpdateDefects = (id: string, defects: string[]) => {
+  const handleSaveInspection = async (record: InspectionRecord) => {
+    const existing = inspections.find(r => r.poleId === record.poleId);
+    if (existing) {
+      await api.updateInspection(existing.id, record);
+      setInspections(prev => prev.map(r => r.poleId === record.poleId ? { ...r, ...record, id: r.id } : r));
+    } else {
+      const newId = await api.saveInspection(record);
+      setInspections(prev => [...prev, { ...record, id: newId }]);
+    }
+  };
+
+  const handleUpdateDefects = async (id: string, defects: string[]) => {
+    const record = inspections.find(r => r.id === id);
+    if (record) {
+      await api.updateInspection(id, { ...record, defects });
+    }
     setInspections(prev => prev.map(r => r.id === id ? { ...r, defects } : r));
   };
 
-  const handleDeleteInspection = (id: string) => {
+  const handleDeleteInspection = async (id: string) => {
+    await api.deleteInspection(id);
     setInspections(prev => prev.filter(r => r.id !== id));
   };
 
@@ -95,7 +115,7 @@ export default function Index() {
       case 'home':
         return <HomePage onNavigate={navigate} stats={stats} />;
       case 'template':
-        return <TemplatePage onTemplateLoaded={setTemplate} currentTemplate={template} />;
+        return <TemplatePage onTemplateLoaded={handleTemplateLoaded} currentTemplate={template} />;
       case 'map':
         return <MapPage template={template} onSelectPole={setSelectedPole} inspectedPoles={inspectedPoles} onNavigate={navigate} />;
       case 'inspection':
@@ -110,6 +130,15 @@ export default function Index() {
         return null;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3">
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <span className="font-mono text-xs text-muted-foreground">Загрузка данных...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

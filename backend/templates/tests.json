@@ -1,0 +1,27 @@
+{
+  "tests": [
+    {
+      "name": "GET template",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {"template": null},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "POST save template",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "lineName": "ВЛ-110 кВ Тест",
+        "voltage": "110",
+        "poles": [
+          {"id": "1", "name": "Оп.1", "lat": 55.7522, "lng": 37.6156, "type": "анкерная"}
+        ]
+      },
+      "expectedStatus": 201,
+      "expectedBody": {"id": 1},
+      "bodyMatcher": "partial"
+    }
+  ]
+}

@@ -17,7 +17,7 @@ interface InspectionRecord {
 
 interface HistoryPageProps {
   inspections: InspectionRecord[];
-  onDeleteInspection: (id: string) => void;
+  onDeleteInspection: (id: string) => void | Promise<void>;
 }
 
 export default function HistoryPage({ inspections, onDeleteInspection }: HistoryPageProps) {

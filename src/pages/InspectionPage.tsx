@@ -32,7 +32,7 @@ interface InspectionRecord {
 interface InspectionPageProps {
   template: LineTemplate | null;
   selectedPole: Pole | null;
-  onSaveInspection: (record: InspectionRecord) => void;
+  onSaveInspection: (record: InspectionRecord) => void | Promise<void>;
   onNavigate: (page: string) => void;
 }
 

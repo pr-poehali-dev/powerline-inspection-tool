@@ -16,7 +16,7 @@ interface LineTemplate {
 }
 
 interface TemplatePageProps {
-  onTemplateLoaded: (template: LineTemplate) => void;
+  onTemplateLoaded: (template: LineTemplate) => void | Promise<void>;
   currentTemplate: LineTemplate | null;
 }
 

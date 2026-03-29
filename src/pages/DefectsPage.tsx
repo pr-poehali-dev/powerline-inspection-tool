@@ -17,7 +17,7 @@ interface InspectionRecord {
 
 interface DefectsPageProps {
   inspections: InspectionRecord[];
-  onUpdateDefects: (id: string, defects: string[]) => void;
+  onUpdateDefects: (id: string, defects: string[]) => void | Promise<void>;
 }
 
 const DEFECT_CATEGORIES = [
